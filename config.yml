@@ -2,3 +2,5 @@ logging:
   level: INFO
   loggers:
     com.logiccache: DEBUG
+swagger:
+  resourcePackage: com.logiccache.resources

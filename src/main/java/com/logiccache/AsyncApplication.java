@@ -8,6 +8,8 @@ import com.logiccache.module.ExecutorModule;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 public class AsyncApplication extends Application<AsyncConfiguration> {
 
@@ -22,7 +24,12 @@ public class AsyncApplication extends Application<AsyncConfiguration> {
 
     @Override
     public void initialize(final Bootstrap<AsyncConfiguration> bootstrap) {
-        // TODO: application initialization
+        bootstrap.addBundle(new SwaggerBundle<AsyncConfiguration>() {
+            @Override
+            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(AsyncConfiguration configuration) {
+                return configuration.swaggerBundleConfiguration;
+            }
+        });
     }
 
     @Override
