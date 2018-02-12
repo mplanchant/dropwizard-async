@@ -27,9 +27,7 @@ public class AsyncApplication extends Application<AsyncConfiguration> {
 
     @Override
     public void run(final AsyncConfiguration configuration, final Environment environment) {
-
         environment.healthChecks().register("book", new BookHealthCheck());
-
 
         final BookComponent component = DaggerBookComponent.builder()
                 .bookModule(new BookModule())
@@ -38,5 +36,4 @@ public class AsyncApplication extends Application<AsyncConfiguration> {
 
         environment.jersey().register(component.inject());
     }
-
 }

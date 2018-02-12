@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.IntStream;
+
 
 @Path("book")
 @Produces(MediaType.APPLICATION_JSON)
@@ -37,42 +39,42 @@ public class BookResource {
     @GET
     @Timed
     @Path("/sync")
-    public List<Book> sync() throws InterruptedException {
+    public List<Book> sync() {
         LOGGER.info("sync {}", Thread.currentThread().getId());
-        Thread.sleep(50);
+        delay(50);
         return bookService.retrieveAllBooks();
     }
 
-    @ManagedAsync
-    @Timed
     @GET
+    @Timed
     @Path("/async")
-    public void async(@Suspended final AsyncResponse asyncResponse) throws InterruptedException {
+    @ManagedAsync
+    public void async(@Suspended final AsyncResponse asyncResponse) {
         LOGGER.info("async {}", Thread.currentThread().getId());
-        Thread.sleep(50);
+        delay(50);
         asyncResponse.resume(bookService.retrieveAllBooks());
     }
 
     @GET
-    @Path("/async_future")
     @Timed
+    @Path("/async_future")
     public void asyncFuture(@Suspended final AsyncResponse asyncResponse) {
         LOGGER.info("async_future {}", Thread.currentThread().getId());
-        CompletableFuture<List<Book>> completableFuture = new CompletableFuture<>();
-        executorService.submit(() -> {
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            completableFuture.complete(bookService.retrieveAllBooks());
+
+        CompletableFuture
+                .supplyAsync(bookService::retrieveAllBooks, executorService)
+                .thenAccept(asyncResponse::resume)
+                .thenRun(() -> System.out.println("Computation finished."));
+
+        IntStream.range(1, 10).forEach(i -> {
+            delay(100);
+            System.out.println("Doing useful work");
         });
-        completableFuture.thenAcceptAsync(asyncResponse::resume);
     }
 
     @GET
-    @Path("/sync_future")
     @Timed
+    @Path("/sync_future")
     public List<Book> syncFuture() throws ExecutionException, InterruptedException {
         LOGGER.info("sync_future {}", Thread.currentThread().getId());
         SettableFuture<List<Book>> settableFuture = SettableFuture.create();
@@ -85,5 +87,13 @@ public class BookResource {
             settableFuture.set(bookService.retrieveAllBooks());
         });
         return settableFuture.get();
+    }
+
+    private void delay(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
