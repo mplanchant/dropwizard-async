@@ -1,0 +1,24 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: com.google.dagger:dagger
+    versions:
+    - 2.31.2
+    - "2.32"
+    - "2.33"
+    - "2.34"
+    - 2.34.1
+    - "2.35"
+  - dependency-name: io.dropwizard:dropwizard-bom
+    versions:
+    - 2.0.18
+    - 2.0.19
+    - 2.0.20
+  - dependency-name: org.projectlombok:lombok
+    versions:
+    - 1.18.18
